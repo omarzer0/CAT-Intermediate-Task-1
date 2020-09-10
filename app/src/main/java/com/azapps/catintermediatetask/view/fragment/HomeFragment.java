@@ -8,10 +8,12 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -19,6 +21,8 @@ import com.azapps.catintermediatetask.R;
 import com.azapps.catintermediatetask.adapter.OnFavouriteImageClickListener;
 import com.azapps.catintermediatetask.adapter.RepoAdapter;
 import com.azapps.catintermediatetask.data.Repo;
+import com.azapps.catintermediatetask.data.RepoItem;
+import com.azapps.catintermediatetask.data.RepoOwner;
 import com.azapps.catintermediatetask.retrofit.DataApi;
 import com.azapps.catintermediatetask.retrofit.RetrofitClient;
 
@@ -36,12 +40,19 @@ public class HomeFragment extends Fragment implements OnFavouriteImageClickListe
     private List<Repo> repoListResult;
     private RepoAdapter adapter;
     private DataApi dataApi;
+    private RepoViewModel repoViewModel;
 
     public HomeFragment() {
     }
 
     public static HomeFragment newInstance() {
         return new HomeFragment();
+    }
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        modelViewInstantiate();
     }
 
     @Nullable
@@ -52,9 +63,12 @@ public class HomeFragment extends Fragment implements OnFavouriteImageClickListe
         intiViews(view);
         buildRetrofit();
         initEditTextSearchFunction();
-//        getResultsFromRetrofit("omarzer0");
-
         return view;
+    }
+
+    private void modelViewInstantiate() {
+        repoViewModel = new ViewModelProvider(this, ViewModelProvider.AndroidViewModelFactory.
+                getInstance(getActivity().getApplication())).get(RepoViewModel.class);
     }
 
     private void intiViews(View view) {
@@ -111,13 +125,17 @@ public class HomeFragment extends Fragment implements OnFavouriteImageClickListe
         LinearLayoutManager manager = new LinearLayoutManager(getContext());
         recyclerView.setLayoutManager(manager);
         recyclerView.hasFixedSize();
-        adapter = new RepoAdapter(getContext(), this);
+        adapter = new RepoAdapter(getContext(), this, true);
         adapter.submitList(repoListResult);
         recyclerView.setAdapter(adapter);
     }
 
     @Override
     public void onFavouriteImageClick(int position) {
-
+        Repo repo = repoListResult.get(position);
+        RepoOwner repoOwner = repo.getRepoOwner();
+        RepoItem repoItem = new RepoItem(repo.getName(), repo.getFullName(), repoOwner.getAvatarUrl());
+        repoViewModel.insert(repoItem);
+        Toast.makeText(getActivity(), "Added to favourite", Toast.LENGTH_SHORT).show();
     }
 }

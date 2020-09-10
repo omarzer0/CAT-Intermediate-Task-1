@@ -10,21 +10,18 @@ import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.ListAdapter;
 
 import com.azapps.catintermediatetask.R;
-import com.azapps.catintermediatetask.data.Repo;
-import com.azapps.catintermediatetask.data.RepoOwner;
+import com.azapps.catintermediatetask.data.RepoItem;
 import com.bumptech.glide.Glide;
 
-public class RepoAdapter extends ListAdapter<Repo, RepoViewHolder> {
+public class RepoDbAdapter extends ListAdapter<RepoItem, RepoViewHolder> {
     OnFavouriteImageClickListener listener;
     private Context context;
-    private boolean isFromRetrofit;
-    private static final DiffUtil.ItemCallback<Repo> diffCallback = new DiffUtilRepoCallback();
+    private static final DiffUtil.ItemCallback<RepoItem> diffCallback = new DiffUtillRepoDbCallback();
 
-    public RepoAdapter(Context context, OnFavouriteImageClickListener onFavouriteImageClickListener, Boolean isFromRetrofit) {
+    public RepoDbAdapter(Context context, OnFavouriteImageClickListener onFavouriteImageClickListener) {
         super(diffCallback);
         this.context = context;
         listener = onFavouriteImageClickListener;
-        this.isFromRetrofit = isFromRetrofit;
     }
 
     @NonNull
@@ -38,14 +35,11 @@ public class RepoAdapter extends ListAdapter<Repo, RepoViewHolder> {
 
     @Override
     public void onBindViewHolder(@NonNull RepoViewHolder holder, int position) {
-        if (isFromRetrofit) {
-            Repo currentRepo = getItem(position);
-            RepoOwner currentRepoOwner = currentRepo.getRepoOwner();
-            holder.repoNameTV.setText(currentRepo.getName());
-            String fullRepoOwner = currentRepo.getFullName();
-            String[] repoOwnerName = fullRepoOwner.split("/");
-            holder.userNameTV.setText(repoOwnerName[0]);
-            Glide.with(context).load(currentRepoOwner.getAvatarUrl()).into(holder.repoImageView);
-        }
+        RepoItem currentRepo = getItem(position);
+        holder.repoNameTV.setText(currentRepo.getRepo());
+        String fullRepoOwner = currentRepo.getUserName();
+        String[] repoOwnerName = fullRepoOwner.split("/");
+        holder.userNameTV.setText(repoOwnerName[0]);
+        Glide.with(context).load(currentRepo.getImageUrl()).into(holder.repoImageView);
     }
 }
